@@ -23,11 +23,13 @@ router.get('/todos', async (req, res) => {
 
 // Post /ToDos
 router.post('/todos', async (req, res) => {
-   const { todo } = req.body;
+   let { todo } = req.body;
 
    if (!todo) {
       return res.status(400).json({ error: "Todo field is required" });
    }
+
+   todo = (typeof todo === 'string') ? todo : JSON.stringify(todo); 
 
    const collection = getCollection();
    const newTodo = await collection.insertOne({ todo, status: false });
@@ -52,6 +54,9 @@ router.put('/todos/:id', async (req, res) => {
    const _id = new ObjectId(req.params.id);
    const { status } = req.body;
 
+   if(typeof status !== 'boolean') {
+      return res.status(400).json({ error: "invalid status" });
+   }
    const updatedTodo = await collection.updateOne({ _id }, { $set: { status: !status } });
    res.status(201).json(updatedTodo);
 });
